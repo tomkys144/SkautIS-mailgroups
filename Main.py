@@ -1,7 +1,10 @@
 #Volání API
 from skautis import SkautisApi
 
-skautis = SkautisApi("APIKEY")
+skautis = SkautisApi("APIKEY", test=True)
 
-from Person_list import person_list
+skautis.OrganizationUnit.PersonAll()
+
+from .Person_list import person_list
+
 print(person_list("APIKEY"))
