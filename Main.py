@@ -1,9 +1,14 @@
 from skautis import SkautisApi
 
-#Volání Api
+#API call
 from .Config import APIKEY
+
 skautis = SkautisApi(APIKEY, test=True)
 
-from .Person_list import person_list
+#list
+from .Config import uni
+from .Config import login
 
-print(person_list(APIKEY))
+list = skautis.OrganizationUnit.PersonAllExport(ID_Login=login, ID_Unit=uni)
+
+return list
