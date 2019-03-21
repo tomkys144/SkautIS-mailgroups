@@ -9,6 +9,6 @@ skautis = SkautisApi(APIKEY, test=True)
 from .Config import uni
 from .Config import login
 
-list = skautis.OrganizationUnit.PersonAllExport(ID_Login=login, ID_Unit=uni)
-
-return list
+class Peli(self):
+    list = skautis.OrganizationUnit.PersonAllExport(ID_Login=login, ID_Unit=uni)
+    return list
