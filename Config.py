@@ -1,4 +1,3 @@
-APIKEY="Your APIKEY"
-ID="Your ID"
-login=""
-unit=int()
+key = "Your APIKEY"
+login = ""
+unit = int()

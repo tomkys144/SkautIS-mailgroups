@@ -2,18 +2,18 @@ from skautis import SkautisApi
 
 
 # API call
-from .Config import APIKEY
+from .Config import key
 
-skautis = SkautisApi(APIKEY, test=True)
+skautis = SkautisApi(appId=key, test=True)
 
 
-# unit IDs
+# children units IDs
 unit_id = int()
 
 
 def unit_ids():
     from .Config import login
-    from .Config import  unit
+    from .Config import unit
     units_id = skautis.OrganizationUnit.UnitAllUnit(ID_Login=login, ID_Unit=unit)
     return units_id
 
