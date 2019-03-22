@@ -7,9 +7,19 @@ from .Config import APIKEY
 skautis = SkautisApi(APIKEY, test=True)
 
 
-# list
-def peli():
-    from .Config import uni
+# unit IDs
+unit_id = int()
+
+
+def unit_ids():
     from .Config import login
-    perlis = skautis.OrganizationUnit.PersonAllExport(ID_Login=login, ID_Unit=uni)
-    return perlis
+    from .Config import  unit
+    units_id = skautis.OrganizationUnit.UnitAllUnit(ID_Login=login, ID_Unit=unit)
+    return units_id
+
+
+# list
+def person_list():
+    from .Config import login
+    plist = skautis.OrganizationUnit.PersonAllExport(ID_Login=login, ID_Unit=unit_id)
+    return plist
