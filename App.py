@@ -12,7 +12,7 @@ skautis = SkautisApi(appId=cfg['key'], test=True)
 # children units IDs
 def unit_ids():
     uids = []
-    units_info = array(skautis.OrganizationUnit.UnitAllUnit(ID_Login=cfg['login'], ID_Unit=cfg['unit']))
+    units_info = array(skautis.OrganizationUnit.UnitAll(ID_Login=cfg['login'], ID_UnitParent=cfg['unit']))
     i = 0
     for x in units_info:
         uids[i] = x[ID]
@@ -21,6 +21,6 @@ def unit_ids():
 
 
 # list
-def person_list():
-    plist = skautis.OrganizationUnit.PersonAllExport(ID_Login=cfg['login'], ID_Unit=unit_id)
+def person_list(uid):
+    plist = skautis.OrganizationUnit.PersonAllExport(ID_Login=cfg['login'], ID_Unit=uid)
     return plist
