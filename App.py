@@ -15,7 +15,7 @@ def unit_ids():
     units_info = array(skautis.OrganizationUnit.UnitAll(ID_Login=cfg['login'], ID_UnitParent=cfg['unit']))
     i = 0
     for x in units_info:
-        uids[i] = x[ID]
+        uids[i] = x["ID"]
         i = i+1
     return uids
 
