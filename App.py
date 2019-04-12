@@ -32,13 +32,14 @@ def id_list(person_list, login):
 
 
 def contacts(idlist, login):
-    contacts = []
+    cnts = []
     for x in idlist
         person = x['ID']
         con_list = skautis.OrganizationUnit.PersonContactAll(
             ID_Login=login, ID_Person=person, IsCatalog=None, IsMain=None, ID_ContactType=None
         )
         mails = []
-        for y in con_list
+        for y in con_list:
             mails.append(y['ID_ContactType', 'Value'])
-        contacts.append([idlist, mails])
+        cnts.append([idlist, mails])
+    return cnts
