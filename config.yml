@@ -1,3 +1,4 @@
-key : !!bool "n3446bs" #API key
-login : !!bool "n6772shi" #login ID
-unit : !!int "98762" #unit ID
+key : "12345678-90ab-cdef-ghij-klmnopqrstuv" #API key
+login : "12345678-90ab-cdef-ghij-klmnopqrstuv" #login ID
+role : 1234 #your role
+unit : 12345 #unit ID
