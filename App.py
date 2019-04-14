@@ -33,7 +33,7 @@ def id_list(person_list, login):
 
 def contacts(idlist, login):
     cnts = []
-    for x in idlist
+    for x in idlist:
         person = x['ID']
         con_list = skautis.OrganizationUnit.PersonContactAll(
             ID_Login=login, ID_Person=person, IsCatalog=None, IsMain=None, ID_ContactType=None
