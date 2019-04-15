@@ -1,6 +1,6 @@
 import yaml
 from skautis import SkautisApi
-from Converter import converter
+from converter import converter
 with open("config.yml", "r") as config:
     cfg = yaml.load(config)
 
@@ -19,30 +19,30 @@ def person_list(login, unit, direct):
 
 def id_list(person_list, login):
     idlist = []
-    for x in person_list:
+    for person in person_list:
         units = skautis.OrganizationUnit.MembershipAllPerson(
             ID_Login=login, ID_Person=x['ID'], ID_Unit=None, ShowHistory=False, IsValid=True
         )
         memberships = []
-        for y in units:
-            unit = y['Unit']
-            id_unit = y['ID_Unit']
+        for unt in units:
+            unit = unt['Unit']
+            id_unit = unt['ID_Unit']
             memberships.append([unit, id_unit])
-        idlist.append([x['ID'], memberships])
+        idlist.append([person['ID'], memberships])
     return idlist
 
 
 def contacts(idlist, login):
     cnts = []
-    for x in idlist:
-        person = x['ID']
+    for person in idlist:
+        ID = person['ID']
         con_list = skautis.OrganizationUnit.PersonContactAll(
-            ID_Login=login, ID_Person=person, IsCatalog=None, IsMain=None, ID_ContactType=None
+            ID_Login=login, ID_Person=ID, IsCatalog=None, IsMain=None, ID_ContactType=None
         )
         mails = []
-        for y in con_list:
-            mails.append(y['ID_ContactType', 'Value'])
-        cnts.append([idlist, mails])
+        for cnt in con_list:
+            mails.append(cnt['ID_ContactType', 'Value'])
+        cnts.append([person, mails])
     return cnts
 
 
@@ -50,53 +50,53 @@ def ggroups(login, unit, contacts, domain):
     group_list = skautis.GoogleApps.GoogleGroupAll(
         ID_Login=login, ID_Unit=unit, IncludeChildUnits=True, ID=None, DisplayName=None
     )
-    for n in group_list:
-        n.remove('Unit', 'RegistrationNumber', 'DateCreate', 'Valid', 'AliasCount')
-    for x in contacts:
-        for y in x['idlist']:
-            for z in y['memberships']:
-                for a in group_list:
-                    if y['Unit'] == z['DisplayName']:
-                        for b in contacts['mails']:
-                            if b['ID_ContactType']=="email_hlavni":
+    for grp in group_list:  # simplifies group list
+        grp.remove('Unit', 'RegistrationNumber', 'DateCreate', 'Valid', 'AliasCount')
+    for cnt in contacts:    # takes every person in contact list
+        for ID in cnt['idlist']:    # gets every person's info in contact
+            for mems in ID['memberships']:  # gets every membership of a person
+                for grp in group_list:  # takes every group from group list
+                    if ID['Unit'] == mems['DisplayName']:
+                        for cnt in contacts['mails']:   # takes every contact of a person
+                            if cnt['ID_ContactType']=="email_hlavni":
                                 skautis.GoogleApps.GoogleGroupDeleteMember(
-                                    ID_Login=login, ID=a['ID'], Email=b['Value']
+                                    ID_Login=login, ID=grp['ID'], Email=cnt['Value']
                                 )
                                 skautis.GoogleApps.GoogleGroupUpdateMemberEmail(
-                                    ID_Login=login, ID=a['ID'], EmailArray=b['Value']
+                                    ID_Login=login, ID=grp['ID'], EmailArray=cnt['Value']
                                 )
-                    elif "Rodiče - "+y['Unit'] == z['DisplayName']:
-                        for b in contacts['mails']:
-                            if b['ID_ContactType']=="email_otec" or b['ID_ContactType']=="email_matka":
+                    elif "Rodiče - "+ID['Unit'] == mems['DisplayName']:
+                        for cnt in contacts['mails']:
+                            if cnt['ID_ContactType']=="email_otec" or cnt['ID_ContactType']=="email_matka":
                                 skautis.GoogleApps.GoogleGroupDeleteMember(
-                                    ID_Login=login, ID=a['ID'], Email=b['Value']
+                                    ID_Login=login, ID=grp['ID'], Email=cnt['Value']
                                 )
                                 skautis.GoogleApps.GoogleGroupUpdateMemberEmail(
-                                    ID_Login=login, ID=a['ID'], EmailArray=b['Value']
+                                    ID_Login=login, ID=grp['ID'], EmailArray=cnt['Value']
                                 )
                     else:
-                        mail = converter(y['Unit'])
+                        mail = converter(ID['Unit'])
                         new_id = skautis.GoogleApps.GoogleGroupInsert(
-                            ID_Login=login, ID_Unit=unit, DisplayName=y['Unit'], Email=mail+"@"+domain
+                            ID_Login=login, ID_Unit=unit, DisplayName=ID['Unit'], Email=mail+"@"+domain
                         )
-                        for b in contacts['mails']:
-                            if b['ID_ContactType']=="email_hlavni":
+                        for cnt in contacts['mails']:
+                            if cnt['ID_ContactType']=="email_hlavni":
                                 skautis.GoogleApps.GoogleGroupDeleteMember(
-                                    ID_Login=login, ID=new_id, Email=b['Value']
+                                    ID_Login=login, ID=new_id, Email=cnt['Value']
                                 )
                                 skautis.GoogleApps.GoogleGroupUpdateMemberEmail(
-                                    ID_Login=login, ID=new_id, EmailArray=b['Value']
+                                    ID_Login=login, ID=new_id, EmailArray=cnt['Value']
                                 )
                         new_id = skautis.GoogleApps.GoogleGroupInsert(
-                            ID_Login=login, ID_Unit=unit, DisplayName="Rodiče - "+y['Unit'], Email="rodice-"+mail+"@"+domain
+                            ID_Login=login, ID_Unit=unit, DisplayName="Rodiče - "+ID['Unit'], Email="rodice-"+mail+"@"+domain
                         )
-                        for b in contacts['mails']:
-                            if b['ID_ContactType']=="email_hlavni":
+                        for cnt in contacts['mails']:
+                            if cnt['ID_ContactType']=="email_hlavni":
                                 skautis.GoogleApps.GoogleGroupDeleteMember(
-                                    ID_Login=login, ID=new_id, Email=b['Value']
+                                    ID_Login=login, ID=new_id, Email=cnt['Value']
                                 )
                                 skautis.GoogleApps.GoogleGroupUpdateMemberEmail(
-                                    ID_Login=login, ID=new_id, EmailArray=b['Value']
+                                    ID_Login=login, ID=new_id, EmailArray=cnt['Value']
                                 )
 
 
