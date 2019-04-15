@@ -43,3 +43,24 @@ def contacts(idlist, login):
             mails.append(y['ID_ContactType', 'Value'])
         cnts.append([idlist, mails])
     return cnts
+
+
+def ggroups(login, unit, contacts):
+    group_list = skautis.GoogleApps.GoogleGroupAll(
+        ID_Login=login, ID_Unit=unit, IncludeChildUnits=True, ID=None, DisplayName=None
+    )
+    for n in group_list:
+        n.remove('Unit', 'RegistrationNumber', 'DateCreate', 'Valid', 'AliasCount')
+    for x in contacts:
+        for y in x['idlist']:
+            for z in y['memberships']
+                for a in group_list:
+                    if y['unit'] == z['DisplayName']:
+                        for b in contacts['mails']:
+                            if b['ID_ContactType']=="email_hlavni":
+                                skautis.GoogleApps.GoogleGroupDeleteMember(
+                                    ID_Login=login, ID=a['ID'], Email=b['Value']
+                                )
+                                skautis.GoogleApps.GoogleGroupUpdateMemberEmail(
+                                    ID_Login=login, ID=a['ID'], EmailArray=b['Value']
+                                )
