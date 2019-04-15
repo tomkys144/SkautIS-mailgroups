@@ -1,4 +1,5 @@
-key : "ef34247c-6f84-4b29-8b97-81add0c5bdbf" #API key
-login : "9959b921-660e-4987-b841-07bc3653ee1b" #login ID
-role : 6595 #your role
-unit : 27422 #unit ID
+key : "12345678-90ab-cdef-ghij-klmnopqrstuv" #API key
+login : "12345678-90ab-cdef-ghij-klmnopqrstuv" #login ID
+role : 1234 #your role
+unit : 12345 #unit ID
+domain : "domain.cz"
