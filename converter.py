@@ -1,5 +1,6 @@
 def converter(string):
     string.replace(" ", "-")
+    string.replace(".", "")
     string.replace("ž", "z")
     string.replace("Ž", "z")
     string.replace("ý", "y")
