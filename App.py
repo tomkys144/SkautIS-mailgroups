@@ -21,7 +21,7 @@ def id_list(person_list, login):
     idlist = []
     for person in person_list:
         units = skautis.OrganizationUnit.MembershipAllPerson(
-            ID_Login=login, ID_Person=x['ID'], ID_Unit=None, ShowHistory=False, IsValid=True
+            ID_Login=login, ID_Person=person['ID'], ID_Unit=None, ShowHistory=False, IsValid=True
         )
         memberships = []
         for unt in units:
