@@ -1,6 +1,8 @@
 import yaml
 from skautis import SkautisApi
 from converter import converter
+from google.oauth2 import service_account
+import googleapiclient.discovery
 with open("config.yml", "r") as config:
     cfg = yaml.load(config)
 
@@ -46,34 +48,38 @@ def contacts(idlist, login):
     return cnts
 
 
-def ggroups(login, unit, contacts, domain):
+def ggroups(login, unit, path_key, contacts, domain):
     group_list = skautis.GoogleApps.GoogleGroupAll(
         ID_Login=login, ID_Unit=unit, IncludeChildUnits=True, ID=None, DisplayName=None
     )
-    for grp in group_list:  # simplifies group list
+    for grp in group_list: # simplifies group list
         grp.remove('Unit', 'RegistrationNumber', 'DateCreate', 'Valid', 'AliasCount')
-    for cnt in contacts:    # takes every person in contact list
-        for ID in cnt['idlist']:    # gets every person's info in contact
+
+    credentials = service_account.Credentials.from_service_account_file(path_key)
+    gservice = googleapiclient.discovery.build('admin', 'directory_v1', credentials=credentials)
+
+    for cnt in contacts:  # takes every person in contact list
+        for ID in cnt['idlist']:  # gets every person's info in contact
             for mems in ID['memberships']:  # gets every membership of a person
                 for grp in group_list:  # takes every group from group list
                     if ID['Unit'] == mems['DisplayName']:
-                        for cnt in contacts['mails']:   # takes every contact of a person
-                            if cnt['ID_ContactType']=="email_hlavni":
-                                skautis.GoogleApps.GoogleGroupDeleteMember(
-                                    ID_Login=login, ID=grp['ID'], Email=cnt['Value']
-                                )
-                                skautis.GoogleApps.GoogleGroupUpdateMemberEmail(
-                                    ID_Login=login, ID=grp['ID'], EmailArray=cnt['Value']
-                                )
+                        for cnt in contacts['mails']:  # takes every contact of a person
+                            if cnt['ID_ContactType'] == 'email_hlavni':
+                                request = gservice.members().hasMember(groupKey=grp['ID'], memberKey=cnt['Value'])
+                                response = request.get()
+                                if response["isMember"] = False:
+                                    skautis.GoogleApps.GoogleGroupUpdateMemberEmail(
+                                        ID_Login=login, ID=grp['ID'], EmailArray=cnt['Value']
+                                    )
                     elif "Rodiče - "+ID['Unit'] == mems['DisplayName']:
                         for cnt in contacts['mails']:
                             if cnt['ID_ContactType']=="email_otec" or cnt['ID_ContactType']=="email_matka":
-                                skautis.GoogleApps.GoogleGroupDeleteMember(
-                                    ID_Login=login, ID=grp['ID'], Email=cnt['Value']
-                                )
-                                skautis.GoogleApps.GoogleGroupUpdateMemberEmail(
-                                    ID_Login=login, ID=grp['ID'], EmailArray=cnt['Value']
-                                )
+                                request = gservice.members().hasMember(groupKey=grp['ID'], memberKey=cnt['Value'])
+                                response = request.get()
+                                if response["isMember"] = False:
+                                    skautis.GoogleApps.GoogleGroupUpdateMemberEmail(
+                                        ID_Login=login, ID=grp['ID'], EmailArray=cnt['Value']
+                                    )
                     else:
                         mail = converter(ID['Unit'])
                         new_id = skautis.GoogleApps.GoogleGroupInsert(
@@ -104,4 +110,4 @@ def run():
     perl = person_list(cfg['login'],cfg['unit'], False)
     idl = id_list(perl, cfg['login'])
     cnts = contacts(idl, cfg['login'])
-    ggroups(cfg['login'], cfg['unit'], cnts, cfg['domain'])
+    ggroups(cfg['login'], cfg['unit'],cfg['gkey'], cnts, cfg['domain'])

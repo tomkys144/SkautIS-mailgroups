@@ -3,3 +3,4 @@ login : "12345678-90ab-cdef-ghij-klmnopqrstuv" #login ID
 role : 1234 #your role
 unit : 12345 #unit ID
 domain : "domain.cz"
+gkey : "/path/to/key.json" #service account key file

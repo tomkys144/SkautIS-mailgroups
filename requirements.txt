@@ -1,2 +1,4 @@
 PyYAML==5.1
 skautis-py==1.0.5
+google-api-python-client==1.7.11
+oauth2client==4.1.3
