@@ -67,7 +67,7 @@ def ggroups(login, unit, path_key, contacts, domain):
                             if cnt['ID_ContactType'] == 'email_hlavni':
                                 request = gservice.members().hasMember(groupKey=grp['ID'], memberKey=cnt['Value'])
                                 response = request.get()
-                                if response["isMember"] = False:
+                                if response["isMember"] == False:
                                     skautis.GoogleApps.GoogleGroupUpdateMemberEmail(
                                         ID_Login=login, ID=grp['ID'], EmailArray=cnt['Value']
                                     )
@@ -76,7 +76,7 @@ def ggroups(login, unit, path_key, contacts, domain):
                             if cnt['ID_ContactType']=="email_otec" or cnt['ID_ContactType']=="email_matka":
                                 request = gservice.members().hasMember(groupKey=grp['ID'], memberKey=cnt['Value'])
                                 response = request.get()
-                                if response["isMember"] = False:
+                                if response["isMember"] == False:
                                     skautis.GoogleApps.GoogleGroupUpdateMemberEmail(
                                         ID_Login=login, ID=grp['ID'], EmailArray=cnt['Value']
                                     )
