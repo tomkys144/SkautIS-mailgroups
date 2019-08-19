@@ -9,6 +9,9 @@ with open('config.yml', 'r') as config:
 with open('./conf/gkey.json', 'r') as google_key:
     gkey = json.loads(google_key)
 
+credentials = service_account.Credentials.from_service_account_file(google_key)
+gservice = googleapiclient.discovery.build('admin', 'directory_v1', credentials=credentials)
+
 # API call
 skautis = SkautisApi(appId=cfg['key'], test=True)
 
@@ -50,39 +53,36 @@ def contacts(idlist, login):
     return cnts
 
 
-def ggroups(login, unit, path_key, contacts, domain):
+def ggroups_first(login, unit, contacts, domain):
     group_list = skautis.GoogleApps.GoogleGroupAll(
         ID_Login=login, ID_Unit=unit, IncludeChildUnits=True, ID=None, DisplayName=None
     )
-    for grp in group_list: # simplifies group list
-        grp.remove('Unit', 'RegistrationNumber', 'DateCreate', 'Valid', 'AliasCount')
+    for group in group_list: # simplifies group list
+        group.remove('Unit', 'RegistrationNumber', 'DateCreate', 'Valid', 'AliasCount')
 
-    credentials = service_account.Credentials.from_service_account_file(path_key)
-    gservice = googleapiclient.discovery.build('admin', 'directory_v1', credentials=credentials)
-
-    for cnt in contacts:  # takes every person in contact list
-        for ID in cnt['idlist']:  # gets every person's info in contact
+    for contact in contacts:  # takes every person in contact list
+        for ID in contact['idlist']:  # gets every person's info in contact
             for mems in ID['memberships']:  # gets every membership of a person
-                for grp in group_list:  # takes every group from group list
+                for group in group_list:  # takes every group from group list
                     if ID['Unit'] == mems['DisplayName']:
-                        for cnt in contacts['mails']:  # takes every contact of a person
-                            if cnt['ID_ContactType'] == 'email_hlavni':
-                                request = gservice.members().hasMember(groupKey=grp['ID'], memberKey=cnt['Value'])
+                        for email in contacts['mails']:  # takes every contact of a person
+                            if email['ID_ContactType'] == 'email_hlavni':
+                                request = gservice.members().hasMember(groupKey=group['ID'], memberKey=email['Value'])
                                 response = request.get()
                                 answer = json.loads(response)
                                 if answer["isMember"] == False:
                                     skautis.GoogleApps.GoogleGroupUpdateMemberEmail(
-                                        ID_Login=login, ID=grp['ID'], EmailArray=cnt['Value']
+                                        ID_Login=login, ID=group['ID'], EmailArray=email['Value']
                                     )
                     elif "Rodiče - "+ID['Unit'] == mems['DisplayName']:
-                        for cnt in contacts['mails']:
-                            if cnt['ID_ContactType']=="email_otec" or cnt['ID_ContactType']=="email_matka":
-                                request = gservice.members().hasMember(groupKey=grp['ID'], memberKey=cnt['Value'])
+                        for email in contacts['mails']:
+                            if email['ID_ContactType']=="email_otec" or email['ID_ContactType']=="email_matka":
+                                request = gservice.members().hasMember(groupKey=group['ID'], memberKey=email['Value'])
                                 response = request.get()
                                 answer = json.loads(response)
                                 if answer["isMember"] == False:
                                     skautis.GoogleApps.GoogleGroupUpdateMemberEmail(
-                                        ID_Login=login, ID=grp['ID'], EmailArray=cnt['Value']
+                                        ID_Login=login, ID=group['ID'], EmailArray=email['Value']
                                     )
                     else:
                         mail = converter(ID['Unit'])
@@ -92,10 +92,13 @@ def ggroups(login, unit, path_key, contacts, domain):
                         skautis.GoogleApps.GoogleGroupUpdateMemberEmail(
                             ID_Login=login, ID=new_id, EmailArray=gkey['client_email']
                         )
-                        for cnt in contacts['mails']:
-                            if cnt['ID_ContactType']=="email_hlavni":
+                        skautis.GoogleApps.GoogleGroupUpdateMemberRole(
+                            ID_Login=login, ID=new_id, Email=gkey['client_email'], IsOwner=True
+                        )
+                        for email in contacts['mails']:
+                            if email['ID_ContactType']=='email_hlavni':
                                 skautis.GoogleApps.GoogleGroupUpdateMemberEmail(
-                                    ID_Login=login, ID=new_id, EmailArray=cnt['Value']
+                                    ID_Login=login, ID=new_id, EmailArray=email['Value']
                                 )
                         new_id = skautis.GoogleApps.GoogleGroupInsert(
                             ID_Login=login, ID_Unit=unit, DisplayName="Rodiče - "+ID['Unit'], Email="rodice-"+mail+"@"+domain
@@ -103,15 +106,57 @@ def ggroups(login, unit, path_key, contacts, domain):
                         skautis.GoogleApps.GoogleGroupUpdateMemberEmail(
                             ID_Login=login, ID=new_id, EmailArray=gkey['client_email']
                         )
-                        for cnt in contacts['mails']:
-                            if cnt['ID_ContactType']=="email_otec" or cnt['ID_ContactType']=="email_matka":
+                        skautis.GoogleApps.GoogleGroupUpdateMemberRole(
+                            ID_Login=login, ID=new_id, Email=gkey['client_email'], IsOwner=True
+                        )
+                        for email in contacts['mails']:
+                            if email['ID_ContactType']=="email_otec" or email['ID_ContactType']=="email_matka":
                                 skautis.GoogleApps.GoogleGroupUpdateMemberEmail(
-                                    ID_Login=login, ID=new_id, EmailArray=cnt['Value']
+                                    ID_Login=login, ID=new_id, EmailArray=email['Value']
                                 )
+
+
+def ggroups_second(login, unit, contacts):
+    group_list = skautis.GoogleApps.GoogleGroupAll(
+        ID_Login=login, ID_Unit=unit, IncludeChildUnits=True, ID=None, DisplayName=None
+    )
+    for group in group_list:
+        group.remove('Unit', 'RegistrationNumber', 'DateCreate', 'Valid', 'AliasCount')
+
+    for group in group_list:
+        request = gservice.members().list(groupKey=group['ID'])
+        response = request.get()
+        answer = json.loads(response)
+        group_mails = []
+        for member in answer['members']:
+            member_info = json.load(member)
+            if member_info['email'] != gkey['client_email']:
+                group_mails.append(member_info['email'])
+            elif member_info['email'] == gkey['client_email'] and member_info['role'] != 'OWNER':
+                skautis.GoogleApps.GoogleGroupUpdateMemberRole(
+                    ID_Login=login, ID=group['ID'], Email=gkey['client_email'], IsOwner=True
+                )
+                unit_mails = []
+        for contact in contacts:
+            if group['DisplayName'] in contact['person']['memberships']['unit'] and 'Rodiče' not in group['DisplayName']:
+                for email in contact['mails']:
+                    if email['ID_ContactType'] == 'email_hlavni':
+                        unit_mails.append(email['Value'])
+            elif group['DisplayName'] in contact['person']['memberships']['unit'] and 'Rodiče' in group['DisplayName']:
+                for email in contact['mails']:
+                    if email['ID_ContactType'] == "email_otec" or email['ID_ContactType'] == "email_matka":
+                        unit_mails.append(email['Value'])
+
+        difference = set(group_mails) ^ set(unit_mails)
+        if difference:
+            for mail in difference:
+                skautis.GoogleApps.GoogleGroupDeleteMember(
+                    ID_Login=login, ID=group['ID'], Email=mail
+                )
 
 
 def run():
     perl = person_list(cfg['login'],cfg['unit'], False)
     idl = id_list(perl, cfg['login'])
     cnts = contacts(idl, cfg['login'])
-    ggroups(cfg['login'], cfg['unit'], google_key, cnts, cfg['domain'])
+    ggroups_first(cfg['login'], cfg['unit'], cnts, cfg['domain'])
