@@ -3,9 +3,11 @@ from skautis import SkautisApi
 from converter import converter
 from google.oauth2 import service_account
 import googleapiclient.discovery
-with open("config.yml", "r") as config:
+import json
+with open('config.yml', 'r') as config:
     cfg = yaml.load(config)
-
+with open('./conf/gkey.json', 'r') as google_key:
+    gkey = json.loads(google_key)
 
 # API call
 skautis = SkautisApi(appId=cfg['key'], test=True)
@@ -67,7 +69,8 @@ def ggroups(login, unit, path_key, contacts, domain):
                             if cnt['ID_ContactType'] == 'email_hlavni':
                                 request = gservice.members().hasMember(groupKey=grp['ID'], memberKey=cnt['Value'])
                                 response = request.get()
-                                if response["isMember"] == False:
+                                answer = json.loads(response)
+                                if answer["isMember"] == False:
                                     skautis.GoogleApps.GoogleGroupUpdateMemberEmail(
                                         ID_Login=login, ID=grp['ID'], EmailArray=cnt['Value']
                                     )
@@ -76,7 +79,8 @@ def ggroups(login, unit, path_key, contacts, domain):
                             if cnt['ID_ContactType']=="email_otec" or cnt['ID_ContactType']=="email_matka":
                                 request = gservice.members().hasMember(groupKey=grp['ID'], memberKey=cnt['Value'])
                                 response = request.get()
-                                if response["isMember"] == False:
+                                answer = json.loads(response)
+                                if answer["isMember"] == False:
                                     skautis.GoogleApps.GoogleGroupUpdateMemberEmail(
                                         ID_Login=login, ID=grp['ID'], EmailArray=cnt['Value']
                                     )
@@ -85,22 +89,22 @@ def ggroups(login, unit, path_key, contacts, domain):
                         new_id = skautis.GoogleApps.GoogleGroupInsert(
                             ID_Login=login, ID_Unit=unit, DisplayName=ID['Unit'], Email=mail+"@"+domain
                         )
+                        skautis.GoogleApps.GoogleGroupUpdateMemberEmail(
+                            ID_Login=login, ID=new_id, EmailArray=gkey['client_email']
+                        )
                         for cnt in contacts['mails']:
                             if cnt['ID_ContactType']=="email_hlavni":
-                                skautis.GoogleApps.GoogleGroupDeleteMember(
-                                    ID_Login=login, ID=new_id, Email=cnt['Value']
-                                )
                                 skautis.GoogleApps.GoogleGroupUpdateMemberEmail(
                                     ID_Login=login, ID=new_id, EmailArray=cnt['Value']
                                 )
                         new_id = skautis.GoogleApps.GoogleGroupInsert(
                             ID_Login=login, ID_Unit=unit, DisplayName="Rodiče - "+ID['Unit'], Email="rodice-"+mail+"@"+domain
                         )
+                        skautis.GoogleApps.GoogleGroupUpdateMemberEmail(
+                            ID_Login=login, ID=new_id, EmailArray=gkey['client_email']
+                        )
                         for cnt in contacts['mails']:
-                            if cnt['ID_ContactType']=="email_hlavni":
-                                skautis.GoogleApps.GoogleGroupDeleteMember(
-                                    ID_Login=login, ID=new_id, Email=cnt['Value']
-                                )
+                            if cnt['ID_ContactType']=="email_otec" or cnt['ID_ContactType']=="email_matka":
                                 skautis.GoogleApps.GoogleGroupUpdateMemberEmail(
                                     ID_Login=login, ID=new_id, EmailArray=cnt['Value']
                                 )
@@ -110,4 +114,4 @@ def run():
     perl = person_list(cfg['login'],cfg['unit'], False)
     idl = id_list(perl, cfg['login'])
     cnts = contacts(idl, cfg['login'])
-    ggroups(cfg['login'], cfg['unit'],cfg['gkey'], cnts, cfg['domain'])
+    ggroups(cfg['login'], cfg['unit'], google_key, cnts, cfg['domain'])
