@@ -6,18 +6,20 @@ import googleapiclient.discovery
 import json
 import logging
 import datetime
-with open('config.yml', 'r') as config:
+import os
+with open('./conf/config.yml', 'r') as config:
     cfg = yaml.load(config)
 with open('./conf/gkey.json', 'r') as google_key:
     gkey = json.loads(google_key)
 
 today = datetime.date.today()
-ftoday = today.strftime("%d/%m/%Y")
-now = datetime.time.now()
-fnow = now.strftime("%H/%M/%S")
+ftoday = today.strftime("%d.%m.%Y")
+now = datetime.datetime.now().time()
+fnow = now.strftime("%H:%M:%S")
 
 
-name = '/log/log_{0}_{1}'.format(ftoday, fnow)
+name = './log/log_{0}_{1}.log'.format(ftoday, fnow)
+os.makedirs(os.path.dirname(name), exist_ok=True)
 log = logging.getLogger(__name__)
 fhandler = logging.FileHandler(name)
 log.setLevel(logging.INFO)
@@ -26,7 +28,6 @@ log.addHandler(fhandler)
 credentials = service_account.Credentials.from_service_account_file(google_key)
 gservice = googleapiclient.discovery.build('admin', 'directory_v1', credentials=credentials)
 
-# API call
 skautis = SkautisApi(appId=cfg['key'], test=True)
 
 
