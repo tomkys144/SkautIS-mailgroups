@@ -7,8 +7,8 @@ import json
 import logging
 import datetime
 import os
-with open('./conf/config.yml', 'r') as config:
-    cfg = yaml.load(config)
+with open('./conf/config.yml', 'r+') as config:
+    cfg = yaml.safe_load(config)
 with open('./conf/gkey.json', 'r') as google_key:
     gkey = json.loads(google_key)
 
@@ -29,6 +29,7 @@ credentials = service_account.Credentials.from_service_account_file(google_key)
 gservice = googleapiclient.discovery.build('admin', 'directory_v1', credentials=credentials)
 
 skautis = SkautisApi(appId=cfg['key'], test=True)
+login_link = skautis.get_login_url()
 
 
 def personlister(login, unit):
