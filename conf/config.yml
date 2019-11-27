@@ -1,5 +1,4 @@
 key : "12345678-90ab-cdef-ghij-klmnopqrstuv" #API key
-login : "12345678-90ab-cdef-ghij-klmnopqrstuv" #login ID
 unit : 12345 #unit ID
 domain : "domain.cz"
 IP : "localhost"

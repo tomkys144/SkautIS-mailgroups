@@ -1,18 +1,34 @@
 import App
-from bottle import route, request, template, run, redirect
+import yaml
+from bottle import post, route, request, run, response
+
+skautis_token = None
 
 
-@route('/')
-def land():
-    return template('login', login_link=App.login_link)
+@post('/setup')
+def setup():
+    with open('./conf/config.yml') as config:
+        cfg = yaml.safe_load(config)
+    response.content_type = 'application/json'
+    data = request.json
+    login_link = App.login_link
+    cfg['domain'] = data['domain']
+    cfg['unit'] = data['unit']
+    with open('./conf/config.yml', 'w') as file:
+        yaml.safe_dump(cfg, file)
+    return login_link
 
 
-@route('/login')
-def login():
-    skautis_token = request.forms.get('skautIS_Token')
+@route('/start')
+def start():
+    global skautis_token
+    skautis_token = ''
     App.checker(skautis_token, App.cfg['unit'])
+
+
+@route('/logout')
+def logout():
     logout_link = App.skautis.get_logout_url(skautis_token)
-    redirect(logout_link)
 
 
 run(host=App.cfg['IP'], port=8080, debug=True)
