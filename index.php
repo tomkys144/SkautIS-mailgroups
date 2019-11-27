@@ -39,18 +39,3 @@ class groups{
         var_dump($result);
     }
 }
-?>
-<form method="post">
-    <table>
-        <tr>
-            <td>Jednotka:</td>
-            <td><input type = "text" name = "unit"></td>
-        </tr>
-
-        <tr>
-            <td>Doména:</td>
-            <td><input type = "text" name = "domain"></td>
-        </tr>
-    </table>
-</form>
-<a href=>START</a>

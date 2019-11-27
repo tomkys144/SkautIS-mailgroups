@@ -9,7 +9,7 @@ skautis_token = None
 def setup():
     with open('./conf/config.yml') as config:
         cfg = yaml.safe_load(config)
-    response.content_type = 'application/json'
+    response.content_type = 'application/text'
     data = request.json
     login_link = App.login_link
     cfg['domain'] = data['domain']
@@ -29,6 +29,7 @@ def start():
 @route('/logout')
 def logout():
     logout_link = App.skautis.get_logout_url(skautis_token)
+    return logout_link
 
 
 run(host=App.cfg['IP'], port=8080, debug=True)
