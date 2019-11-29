@@ -26,16 +26,16 @@ class groups{
         }
         $url = 'http://groups.tkysela.cz/setup';
         $package = array('unit' => $unit, 'domain' => $domain);
-        $data = json_encode($package);
-        $options = array(
-            'http' => array(
-                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                'method'  => 'POST',
-                'content' => http_build_query($data)
-            )
-        );
-        $context  = stream_context_create($options);
-        $result = file_get_contents($url, false, $context);
-        var_dump($result);
+        $ch = curl_init($url);
+        curl_setopt( $ch, CURLOPT_POST, 1);
+        curl_setopt( $ch, CURLOPT_POSTFIELDS, $package);
+        curl_setopt( $ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt( $ch, CURLOPT_MAXREDIRS, 5);
+        curl_setopt( $ch, CURLOPT_HEADER, 0);
+        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1);
+
+        $response = curl_exec( $ch );
+
+
     }
 }

@@ -9,20 +9,23 @@ skautis_token = None
 def setup():
     with open('./conf/config.yml') as config:
         cfg = yaml.safe_load(config)
-    response.content_type = 'application/text'
     data = request.json
     login_link = App.login_link
-    cfg['domain'] = data['domain']
-    cfg['unit'] = data['unit']
-    with open('./conf/config.yml', 'w') as file:
-        yaml.safe_dump(cfg, file)
-    return login_link
+    if cfg['domain'] != '':
+        response.status = 503
+    else:
+        cfg['domain'] = data['domain']
+        cfg['unit'] = data['unit']
+        with open('./conf/config.yml', 'w') as file:
+            yaml.safe_dump(cfg, file)
+        response.body = login_link
+    return response
 
 
 @route('/start')
 def start():
     global skautis_token
-    skautis_token = ''
+    skautis_token = request.post
     App.checker(skautis_token, App.cfg['unit'])
 
 
