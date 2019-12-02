@@ -1,8 +1,9 @@
 import App
 import yaml
-from bottle import post, route, request, run, response
+from bottle import post, route, request, run, response, redirect
 
 skautis_token = None
+redir_link = None
 
 
 @route('/check')
@@ -27,6 +28,7 @@ def setup():
     if cfg['domain'] != '' or cfg['unit'] != '':
         response.body = 'Busy'
     else:
+        global redir_link
         redir_link = data['page']
         login_link = App.loginer(redir_link)
         cfg['domain'] = data['domain']
@@ -60,6 +62,12 @@ def finish():
     else:
         response.status = 400
         return response
+
+@route('/logout')
+def logout():
+    global redir_link
+    redirect(redir_link, 308)
+    redir_link = None
 
 
 run(host=App.cfg['IP'], port=8080, debug=True)

@@ -42,6 +42,21 @@ class groups{
 
 
     public function groupsShortCode() {
+        echo (
+            <form method="post">
+                <table>
+                    <tr>
+                        <td>Jednotka:</td>
+                        <td><input type = "text" name = "unit"></td>
+                    </tr>
+
+                    <tr>
+                        <td>Doména:</td>
+                        <td><input type = "text" name = "domain"></td>
+                    </tr>
+                </table>
+            </form>
+        );
         $url = 'http://groups.tkysela.cz/check';
         $ch = curl_init($url);
         curl_setopt( $ch, CURLOPT_POST, 1);

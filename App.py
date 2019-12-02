@@ -38,7 +38,7 @@ skautis = SkautisApi(appId=cfg['key'], test=True)
 
 
 def loginer(redir_link):
-    login_link = skautis.get_login_url() + redir_link
+    login_link = skautis.get_login_url() + '&ReturnUrl=' + redir_link
     return login_link
 
 
