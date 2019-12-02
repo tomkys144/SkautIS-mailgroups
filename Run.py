@@ -5,15 +5,30 @@ from bottle import post, route, request, run, response
 skautis_token = None
 
 
+@route('/check')
+def check():
+    data = request.post
+    if data == 'check login':
+        if skautis_token is not None:
+            response.body = 'logged in'
+            return response
+        else:
+            response.body = 'not logged in'
+            return response
+    else:
+        response.status = 400
+        return response
+
 @post('/setup')
 def setup():
     with open('./conf/config.yml') as config:
         cfg = yaml.safe_load(config)
     data = request.json
-    login_link = App.login_link
     if cfg['domain'] != '':
-        response.status = 503
+        response.body = 'Busy'
     else:
+        redir_link = data['page']
+        login_link = App.loginer(redir_link)
         cfg['domain'] = data['domain']
         cfg['unit'] = data['unit']
         with open('./conf/config.yml', 'w') as file:

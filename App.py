@@ -8,7 +8,12 @@ import logging
 import datetime
 import os
 cfg = None
-gkey = None
+
+
+with open('./conf/gkey.json', 'r') as google_key:
+    global gkey
+    gkey = json.loads(google_key)
+
 
 today = datetime.date.today()
 ftoday = today.strftime("%d.%m.%Y")
@@ -23,20 +28,23 @@ fhandler = logging.FileHandler(name)
 log.setLevel(logging.INFO)
 log.addHandler(fhandler)
 
+
 credentials = service_account.Credentials.from_service_account_file(google_key)
 gservice = googleapiclient.discovery.build('admin', 'directory_v1', credentials=credentials)
 
+
 skautis = SkautisApi(appId=cfg['key'], test=True)
-login_link = skautis.get_login_url()
+
+
+def loginer(redir_link):
+    login_link = skautis.get_login_url() + redir_link
+    return login_link
 
 
 def opener():
     with open('./conf/config.yml', 'r+') as config:
         global cfg
         cfg = yaml.safe_load(config)
-    with open('./conf/gkey.json', 'r') as google_key:
-        global gkey
-        gkey = json.loads(google_key)
 
 
 def personlister(login, unit):
