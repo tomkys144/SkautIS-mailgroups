@@ -8,6 +8,7 @@ import logging
 import datetime
 import os
 cfg = None
+finished = False
 
 
 with open('./conf/gkey.json', 'r') as google_key:
@@ -42,7 +43,7 @@ def loginer(redir_link):
 
 
 def opener():
-    with open('./conf/config.yml', 'r+') as config:
+    with open('./conf/config.yml', 'rw') as config:
         global cfg
         cfg = yaml.safe_load(config)
 
@@ -189,4 +190,8 @@ def checker(login, unit):
                 log.info('Added {0} into group {1} as owner'.format(
                     gkey['client_email'], unt['DisplayName']
                 ))
+    global finished
+    finished = True
+    cfg['unit'] = ''
+    cfg['domain'] = ''
 

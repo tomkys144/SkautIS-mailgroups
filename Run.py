@@ -24,7 +24,7 @@ def setup():
     with open('./conf/config.yml') as config:
         cfg = yaml.safe_load(config)
     data = request.json
-    if cfg['domain'] != '':
+    if cfg['domain'] != '' or cfg['unit'] != '':
         response.body = 'Busy'
     else:
         redir_link = data['page']
@@ -44,10 +44,22 @@ def start():
     App.checker(skautis_token, App.cfg['unit'])
 
 
-@route('/logout')
-def logout():
-    logout_link = App.skautis.get_logout_url(skautis_token)
-    return logout_link
+@route('/finish')
+def finish():
+    data = request.post
+    if data == 'check progress':
+        if App.finished is True:
+            global skautis_token
+            logout_link = App.skautis.get_logout_url(skautis_token)
+            response.body = logout_link
+            skautis_token = None
+            return response
+        else:
+            response.body = 'No'
+            return
+    else:
+        response.status = 400
+        return response
 
 
 run(host=App.cfg['IP'], port=8080, debug=True)

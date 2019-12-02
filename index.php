@@ -11,26 +11,48 @@ class groups{
         \add_shortcode('groups_main', [$this, 'groupsShortCode']);
     }
 
-    private function input($data){
-        $data = trim($data);
-        $data = stripslashes($data);
-        $data = htmlspecialchars($data);
-        return $data;
-    }
 
-    public function groupsShortCode() {
-        $package = 'check login';
-        $url = 'http://groups.tkysela.cz/check';
-        $ch = curl_init($url);
+    private function finish_checker() {
+        $ch = curl_init('http://groups.tkysela.cz/finish');
         curl_setopt( $ch, CURLOPT_POST, 1);
-        curl_setopt( $ch, CURLOPT_POSTFIELDS, $package);
+        curl_setopt( $ch, CURLOPT_POSTFIELDS, 'check progress');
         curl_setopt( $ch, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt( $ch, CURLOPT_MAXREDIRS, 5);
         curl_setopt( $ch, CURLOPT_HEADER, 0);
         curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1);
 
         $response = curl_exec( $ch );
-        if ($response != 'logged in') {
+
+        if ($response == 'No') {
+            sleep(1);
+            return $this->finish_checker();
+        }
+        else {
+            return $response;
+        }
+    }
+
+
+    private function input($data) {
+        $data = trim($data);
+        $data = stripslashes($data);
+        $data = htmlspecialchars($data);
+        return $data;
+    }
+
+
+    public function groupsShortCode() {
+        $url = 'http://groups.tkysela.cz/check';
+        $ch = curl_init($url);
+        curl_setopt( $ch, CURLOPT_POST, 1);
+        curl_setopt( $ch, CURLOPT_POSTFIELDS, 'check login');
+        curl_setopt( $ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt( $ch, CURLOPT_MAXREDIRS, 5);
+        curl_setopt( $ch, CURLOPT_HEADER, 0);
+        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1);
+
+        $response = curl_exec( $ch );
+        if ($response == 'not logged in') {
             $unit = $domain = '';
             if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $unit = input($_POST['unit']);
@@ -56,8 +78,12 @@ class groups{
                 echo 'Please try again later';
             }
         }
-        else {
-
+        elseif ($response == 'logged in') {
+            echo ('running');
+            $logout_link = $this->finish_checker();
+            echo ('finished');
+            header('Location: ' . $logout_link, true, 307);
+            die;
         }
     }
 }
