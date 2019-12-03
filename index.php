@@ -56,7 +56,7 @@ class groups{
                     </tr>
                 </table>
             </form>
-        );
+           );
         $url = 'http://groups.tkysela.cz/check';
         $ch = curl_init($url);
         curl_setopt( $ch, CURLOPT_POST, 1);

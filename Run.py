@@ -58,7 +58,7 @@ def finish():
             return response
         else:
             response.body = 'No'
-            return
+            return response
     else:
         response.status = 400
         return response
