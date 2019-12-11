@@ -42,26 +42,13 @@ def setup():
 @route('/start')
 def start():
     global skautis_token
-    skautis_token = request.post
+    skautis_token = request.post['skautIS_Token']
     App.checker(skautis_token, App.cfg['unit'])
+    logout_link = App.skautis.get_logout_url(skautis_token)
+    response.body = logout_link
+    skautis_token = None
+    return response
 
-
-@route('/finish')
-def finish():
-    data = request.post
-    if data == 'check progress':
-        if App.finished is True:
-            global skautis_token
-            logout_link = App.skautis.get_logout_url(skautis_token)
-            response.body = logout_link
-            skautis_token = None
-            return response
-        else:
-            response.body = 'No'
-            return response
-    else:
-        response.status = 400
-        return response
 
 @route('/logout')
 def logout():
