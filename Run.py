@@ -50,11 +50,4 @@ def start():
     return response
 
 
-@route('/logout')
-def logout():
-    global redir_link
-    redirect(redir_link, 308)
-    redir_link = None
-
-
 run(host=App.cfg['IP'], port=8080, debug=True)
