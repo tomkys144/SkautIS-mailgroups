@@ -1,6 +1,7 @@
 import App
 import yaml
 from bottle import post, route, request, run, response, redirect
+import os
 
 skautis_token = None
 redir_link = None
@@ -50,4 +51,11 @@ def start():
     return response
 
 
-run(host=App.cfg['IP'], port=8080, debug=True)
+@route('/checker')
+def checker():
+    return('works')
+
+
+port = os.environ.get('PORT', 5000)
+
+run(host=App.cfg['IP'], port=port, debug=True)
