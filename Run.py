@@ -58,4 +58,4 @@ def checker():
 
 port = os.environ.get('PORT', 5000)
 
-run(host=App.cfg['IP'], port=port, debug=True)
+run(host=App.rcfg['IP'], port=port, debug=True)
