@@ -84,7 +84,7 @@ class groups{
 
             $response = curl_exec( $ch );
             echo ('finished');
-            sleep(1);
+            sleep(1);en
             header('Location: ' . $response, true, 307);
             die;
         }

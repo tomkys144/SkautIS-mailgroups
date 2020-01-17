@@ -10,9 +10,12 @@ import os
 cfg = None
 
 
-with open('./conf/gkey.json', 'r') as google_key:
-    global gkey
-    gkey = json.loads(google_key)
+with open('./conf/gkey.json') as google_key:
+    gkey = json.loads(google_key.read())
+
+
+with open('./conf/run_config.yml', 'r') as rconfig:
+    rcfg = yaml.safe_load(rconfig)
 
 
 today = datetime.date.today()
@@ -29,11 +32,11 @@ log.setLevel(logging.INFO)
 log.addHandler(fhandler)
 
 
-credentials = service_account.Credentials.from_service_account_file(google_key)
+credentials = service_account.Credentials.from_service_account_file('./conf/gkey.json')
 gservice = googleapiclient.discovery.build('admin', 'directory_v1', credentials=credentials)
 
 
-skautis = SkautisApi(appId=cfg['key'], test=True)
+skautis = SkautisApi(appId=rcfg['key'], test=False)
 
 
 def loginer(redir_link):
