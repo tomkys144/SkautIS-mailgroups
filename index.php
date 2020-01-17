@@ -8,7 +8,7 @@
 $login_link = '';
 class groups{
     public function init(){
-        \add_shortcode('groups_main', [$this, 'groupsShortCode']);
+        \add_shortcode('is_groups', [$this, 'groupsShortCode']);
     }
 
 
