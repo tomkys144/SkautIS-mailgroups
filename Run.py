@@ -7,7 +7,7 @@ skautis_token = None
 redir_link = None
 
 
-@route('/check')
+@route('/login')
 def check():
     data = request.post
     if data == 'check login':
@@ -20,6 +20,7 @@ def check():
     else:
         response.status = 400
         return response
+
 
 @post('/setup')
 def setup():
@@ -50,6 +51,10 @@ def start():
     skautis_token = None
     return response
 
+
+@route('/end')
+def end():
+    redirect(redir_link)
 
 @route('/checker')
 def checker():
